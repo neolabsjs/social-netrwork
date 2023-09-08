@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -18,7 +20,9 @@ import { UserModule } from './user/user.module';
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '../avatars'),
     }),
+    AuthModule,
     UserModule,
+    NotificationModule,
   ],
 })
 export class AppModule {}

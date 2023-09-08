@@ -6,16 +6,21 @@ import {
   Post,
   Put,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CurrentUser } from 'src/auth/decorator';
 import { GetByIdParam } from 'src/utils';
 import { UserService } from './user.service';
 import { IUser } from './interface';
 import { CreateUserDto, UploadAvatarDto } from './dto';
+import { AuthGuard } from 'src/auth/guard';
 
 @ApiTags('User')
+@UseGuards(AuthGuard)
+@ApiSecurity('bearer')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -46,5 +51,13 @@ export class UserController {
     @UploadedFile() image: Express.Multer.File,
   ): Promise<IUser> {
     return await this.userService.uploadAvatarFile(id, image);
+  }
+
+  @Put('/subscribe/:id')
+  async subscribe(
+    @Param() { id }: GetByIdParam,
+    @CurrentUser() user: IUser,
+  ): Promise<void> {
+    return await this.userService.subscribe(id, user);
   }
 }

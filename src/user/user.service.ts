@@ -31,6 +31,10 @@ export class UserService {
     return user;
   }
 
+  async findByEmail(email: string): Promise<IUser> {
+    return await this.userModel.findOne({ email });
+  }
+
   async create(data: CreateUserDto): Promise<IUser> {
     const { name, email, password, passwordRepeat } = data;
 
@@ -85,5 +89,18 @@ export class UserService {
     user.avatar = image.filename;
 
     return user.save();
+  }
+
+  async subscribe(id: string, user: IUser): Promise<void> {
+    if (id !== user._id.toString()) {
+      return;
+    }
+
+    const target = await this.findById(id);
+    target.subscribers.push(user);
+
+    // TODO: notify target
+
+    await target.save();
   }
 }
