@@ -6,6 +6,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { UserModel, UserSchema } from './model';
 import { AuthModule } from 'src/auth/auth.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthModule } from 'src/auth/auth.module';
       }),
     }),
     forwardRef(() => AuthModule),
+    NotificationModule,
   ],
   controllers: [UserController],
   providers: [UserService],

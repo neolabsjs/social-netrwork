@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IUser } from '../interface';
 import mongoose from 'mongoose';
+import { IUser } from '../interface';
 
 @Schema()
 export class UserModel implements IUser {
@@ -19,7 +19,7 @@ export class UserModel implements IUser {
   @Prop()
   avatar: string;
 
-  @Prop({ type: [mongoose.Types.ObjectId], ref: 'user', default: [] })
+  @Prop({ type: [mongoose.Types.ObjectId], ref: 'UserModel', default: [] })
   subscribers: IUser[];
 }
 

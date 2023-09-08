@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +9,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 import * as fs from 'fs';
+import { INotificationService } from 'src/notification/interface';
+import { NotificationService } from 'src/notification/notification.service';
 import { UserModel } from './model';
 import { IUser } from './interface';
 import { CreateUserDto, UploadAvatarDto } from './dto';
@@ -17,6 +20,8 @@ export class UserService {
   constructor(
     @InjectModel(UserModel.name)
     private readonly userModel: Model<UserModel>,
+    @Inject(NotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   async findAll(): Promise<IUser[]> {
@@ -92,15 +97,24 @@ export class UserService {
   }
 
   async subscribe(id: string, user: IUser): Promise<void> {
-    if (id !== user._id.toString()) {
-      return;
+    const target = await this.userModel
+      .findOne({ _id: id })
+      .select('-password')
+      .populate({
+        path: 'subscribers',
+        select: '_id',
+        match: { _id: user._id },
+      });
+
+    if (id !== user._id.toString() && target.subscribers.length === 0) {
+      await this.userModel.updateOne(
+        { _id: id },
+        { $push: { subscribers: user } },
+      );
+      this.notificationService.sendNotification(
+        `${user.name} has subscribed to you!`,
+        target,
+      );
     }
-
-    const target = await this.findById(id);
-    target.subscribers.push(user);
-
-    // TODO: notify target
-
-    await target.save();
   }
 }
